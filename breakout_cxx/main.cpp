@@ -1,15 +1,25 @@
-#include "raylib.h"
-#include "raymath.h"
 #include <iostream>
 #include <vector>
+
+#include "raylib.h"
+#include "raymath.h"
 
 constexpr int WIDTH = 800;
 constexpr int HEIGHT = 450;
 constexpr Color BACKGROUND = BLACK;
 constexpr Color SCENE_OUTLINE = LIGHTGRAY;
-constexpr int TARGET_FPS = 110;
+constexpr int TARGET_FPS = 80;
 
 class Box {
+ public:
+  enum class CollisionType {
+    None,
+    Top,
+    Bot,
+    Left,
+    Right,
+  };
+
  public:
   Box(Vector2 pos, Vector2 size, int line_thick, Color color)
       : _pos{pos}, _size{size}, _line_thick{line_thick}, _color{color} {}
@@ -20,6 +30,37 @@ class Box {
 
   auto draw_lines() const noexcept -> void {
     DrawRectangleLinesEx(this->rect(), this->_line_thick, this->_color);
+  }
+
+  auto intersection(const Box *other) const noexcept -> bool {
+    return (this->left() <= other->right() && other->left() <= this->right()) &&
+           (this->top() <= other->bot() && other->top() <= this->bot());
+  }
+
+  auto collision(const Box *other) const noexcept -> CollisionType {
+    if (!this->intersection(other)) return CollisionType::None;
+
+    auto other_dir_vec = Vector2Subtract(this->_pos, other->_pos);
+    auto angle = Vector2Angle(other_dir_vec, {0.0, 1.0});
+    auto top_left_diag = Vector2Angle(
+        Vector2Subtract(this->pos(), {this->left(), this->top()}), {0.0, 1.0});
+    auto top_right_diag = Vector2Angle(
+        Vector2Subtract(this->pos(), {this->right(), this->top()}), {0.0, 1.0});
+    auto bot_right_diag = Vector2Angle(
+        Vector2Subtract(this->pos(), {this->right(), this->bot()}), {0.0, 1.0});
+    auto bot_left_diag = Vector2Angle(
+        Vector2Subtract(this->pos(), {this->left(), this->bot()}), {0.0, 1.0});
+
+    if (angle < bot_right_diag)
+      return CollisionType::Right;
+    else if (angle < bot_left_diag)
+      return CollisionType::Bot;
+    else if (angle < top_left_diag)
+      return CollisionType::Left;
+    else if (angle < top_right_diag)
+      return CollisionType::Top;
+    else
+      return CollisionType::Right;
   }
 
   constexpr auto rect() const noexcept -> Rectangle {
@@ -129,48 +170,60 @@ class Ball : public Box {
 
   auto update(const Scene &scene, HittableCrates &crates,
               const Platform &platform, float dt) {
+    auto last_pos = this->_pos;
     this->_pos =
         Vector2Add(this->_pos, Vector2Scale(this->_velocity, this->_speed));
 
-    if (this->left() < scene.left() || scene.right() < this->right())
+    if (this->left() < scene.left() || scene.right() < this->right()) {
+      this->_pos = last_pos;
       this->_velocity.x *= -1.0f;
-    if (this->top() < scene.top() || scene.bot() < this->bot())
+      return;
+    }
+    if (this->top() < scene.top() || scene.bot() < this->bot()) {
+      this->_pos = last_pos;
       this->_velocity.y *= -1.0f;
+      return;
+    }
 
     for (auto &crate : crates.crates()) {
       if (crate.disabled()) continue;
-      if (this->check_collision(&crate)) crate.disable();
+      auto collision_type = crate.collision(this);
+      if (collision_type != Box::CollisionType::None) {
+        crate.disable();
+        this->_pos = last_pos;
+        this->handle_collision(collision_type);
+      }
     }
-    this->check_collision(&platform);
+    auto collision_type = platform.collision(this);
+    if (collision_type != Box::CollisionType::None) {
+      this->_pos = last_pos;
+      this->handle_collision(collision_type);
+    }
   }
 
  private:
-  auto check_collision(const Box *box) -> bool {
-    // right
-    if (this->left() < box->right() && box->right() < this->right() &&
-        this->top() < box->bot() && box->top() < this->bot()) {
-      this->_velocity.x *= -1.0f;
-      return true;
-    } else
-      // left
-      if (this->left() < box->left() && box->left() < this->right() &&
-          this->top() < box->bot() && box->top() < this->bot()) {
+  auto handle_collision(Box::CollisionType type) -> void {
+    switch (type) {
+      case Box::CollisionType::None: {
+        break;
+      }
+      case Box::CollisionType::Top: {
+        this->_velocity.y *= -1.0f;
+        break;
+      }
+      case Box::CollisionType::Right: {
         this->_velocity.x *= -1.0f;
-        return true;
-      } else
-        // top
-        if (this->top() < box->top() && box->top() < this->bot() &&
-            this->left() < box->right() && box->left() < this->right()) {
-          this->_velocity.y *= -1.0f;
-          return true;
-        } else
-          // bot
-          if (this->top() < box->bot() && box->bot() < this->bot() &&
-              this->left() < box->right() && box->left() < this->right()) {
-            this->_velocity.y *= -1.0f;
-            return true;
-          }
-    return false;
+        break;
+      }
+      case Box::CollisionType::Bot: {
+        this->_velocity.y *= -1.0f;
+        break;
+      }
+      case Box::CollisionType::Left: {
+        this->_velocity.x *= -1.0f;
+        break;
+      }
+    }
   }
 
  private:
