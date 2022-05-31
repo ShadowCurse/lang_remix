@@ -1,4 +1,6 @@
+#include <cmath>
 #include <iostream>
+#include <optional>
 #include <vector>
 
 #include "raylib.h"
@@ -6,9 +8,12 @@
 
 constexpr int WIDTH = 800;
 constexpr int HEIGHT = 450;
-constexpr Color BACKGROUND = BLACK;
-constexpr Color SCENE_OUTLINE = LIGHTGRAY;
 constexpr int TARGET_FPS = 80;
+constexpr Color BACKGROUND_COLOR = BLACK;
+constexpr Color SCENE_OUTLINE_COLOR = LIGHTGRAY;
+constexpr Color PLATFORM_COLOR = RED;
+constexpr Color BALL_COLOR = GREEN;
+constexpr Color CRATE_COLOR = GREY;
 
 class Box {
  public:
@@ -18,6 +23,12 @@ class Box {
     Bot,
     Left,
     Right,
+  };
+
+  struct Hit {
+    Vector2 pos;
+    Vector2 delta;
+    Vector2 normal;
   };
 
  public:
@@ -32,59 +43,59 @@ class Box {
     DrawRectangleLinesEx(this->rect(), this->_line_thick, this->_color);
   }
 
-  auto intersection(const Box *other) const noexcept -> bool {
-    return (this->left() <= other->right() && other->left() <= this->right()) &&
-           (this->top() <= other->bot() && other->top() <= this->bot());
+  [[nodiscard]] auto collision(const Box *other) const noexcept
+      -> std::optional<Hit> {
+    const auto dx = other->_pos.x - this->_pos.x;
+    const auto px =
+        (other->_size.x / 2.0f + this->_size.x / 2.0f) - std::abs(dx);
+    if (px <= 0) return std::nullopt;
+
+    const auto dy = other->_pos.y - this->_pos.y;
+    const auto py =
+        (other->_size.y / 2.0f + this->_size.y / 2.0f) - std::abs(dy);
+    if (py <= 0) return std::nullopt;
+
+    auto hit = Hit{};
+    if (px < py) {
+      const auto sx = dx < 0 ? -1 : 1;
+      hit.delta.x = px * sx;
+      hit.normal.x = sx;
+      hit.pos.x = this->_pos.x + (this->_size.x / 2.0f * sx);
+      hit.pos.y = other->_pos.y;
+    } else {
+      const auto sy = dy < 0 ? -1 : 1;
+      hit.delta.y = py * sy;
+      hit.normal.y = sy;
+      hit.pos.x = other->_pos.x;
+      hit.pos.y = this->_pos.y + (this->_size.y / 2.0f * sy);
+    }
+    return hit;
   }
 
-  auto collision(const Box *other) const noexcept -> CollisionType {
-    if (!this->intersection(other)) return CollisionType::None;
-
-    auto other_dir_vec = Vector2Subtract(this->_pos, other->_pos);
-    auto angle = Vector2Angle(other_dir_vec, {0.0, 1.0});
-    auto top_left_diag = Vector2Angle(
-        Vector2Subtract(this->pos(), {this->left(), this->top()}), {0.0, 1.0});
-    auto top_right_diag = Vector2Angle(
-        Vector2Subtract(this->pos(), {this->right(), this->top()}), {0.0, 1.0});
-    auto bot_right_diag = Vector2Angle(
-        Vector2Subtract(this->pos(), {this->right(), this->bot()}), {0.0, 1.0});
-    auto bot_left_diag = Vector2Angle(
-        Vector2Subtract(this->pos(), {this->left(), this->bot()}), {0.0, 1.0});
-
-    if (angle < bot_right_diag)
-      return CollisionType::Right;
-    else if (angle < bot_left_diag)
-      return CollisionType::Bot;
-    else if (angle < top_left_diag)
-      return CollisionType::Left;
-    else if (angle < top_right_diag)
-      return CollisionType::Top;
-    else
-      return CollisionType::Right;
-  }
-
-  constexpr auto rect() const noexcept -> Rectangle {
+  [[nodiscard]] constexpr auto rect() const noexcept -> Rectangle {
     return {this->_pos.x - this->_size.x / 2.0f,
             this->_pos.y - this->_size.y / 2.0f, this->_size.x, this->_size.y};
   }
 
-  constexpr auto left() const -> float {
+  [[nodiscard]] constexpr auto left() const noexcept -> float {
     return this->_pos.x - this->_size.x / 2.0;
   }
 
-  constexpr auto right() const -> float {
+  [[nodiscard]] constexpr auto right() const noexcept -> float {
     return this->_pos.x + this->_size.x / 2.0;
   }
 
-  constexpr auto top() const -> float {
+  [[nodiscard]] constexpr auto top() const noexcept -> float {
     return this->_pos.y - this->_size.y / 2.0;
   }
 
-  constexpr auto bot() const -> float {
+  [[nodiscard]] constexpr auto bot() const noexcept -> float {
     return this->_pos.y + this->_size.y / 2.0;
   }
 
-  constexpr auto pos() const -> const Vector2 & { return this->_pos; }
+  [[nodiscard]] constexpr auto pos() const noexcept -> const Vector2 & {
+    return this->_pos;
+  }
 
  protected:
   Vector2 _pos;
@@ -100,11 +111,13 @@ class Crate : public Box {
   Crate(Vector2 pos, Vector2 size, int line_thick, Color color)
       : Box(pos, size, line_thick, color), _disabled{false} {}
 
-  auto disabled() const -> bool { return this->_disabled; }
+  [[nodiscard]] auto disabled() const noexcept -> bool {
+    return this->_disabled;
+  }
 
-  auto enble() { this->_disabled = false; }
+  auto enble() noexcept -> void { this->_disabled = false; }
 
-  auto disable() { this->_disabled = true; }
+  auto disable() noexcept -> void { this->_disabled = true; }
 
  private:
   bool _disabled;
@@ -112,20 +125,20 @@ class Crate : public Box {
 
 class HittableCrates {
  public:
-  HittableCrates(int rows, int cols, Vector2 box_size, Vector2 box_offset,
+  HittableCrates(int rows, int cols, Vector2 crate_size, Vector2 crate_offset,
                  Vector2 screen_center) {
     auto rows_half = rows / 2;
     auto cols_half = cols / 2;
     auto screen_offset_x =
-        screen_center.x - float(cols) / 2.0f * box_offset.x + box_size.x / 2.0f;
+        screen_center.x - float(cols) / 2.0f * crate_offset.x + crate_size.x / 2.0f;
     auto screen_offset_y =
-        screen_center.y - float(rows) / 2.0f * box_offset.y + box_size.y / 2.0f;
+        screen_center.y - float(rows) / 2.0f * crate_offset.y + crate_size.y / 2.0f;
     for (auto x{0}; x < cols; x++)
       for (auto y{0}; y < rows; y++)
         this->_crates.push_back(
-            Crate({float(x) * box_offset.x + screen_offset_x,
-                   float(y) * box_offset.y + screen_offset_y},
-                  box_size, 0, GRAY));
+            Crate({float(x) * crate_offset.x + screen_offset_x,
+                   float(y) * crate_offset.y + screen_offset_y},
+                  crate_size, 0, CRATE_COLOR));
   }
 
   auto draw() const noexcept -> void {
@@ -135,7 +148,9 @@ class HittableCrates {
     }
   }
 
-  auto crates() noexcept -> std::vector<Crate> & { return this->_crates; }
+  [[nodiscard]] auto crates() noexcept -> std::vector<Crate> & {
+    return this->_crates;
+  }
 
  private:
   std::vector<Crate> _crates;
@@ -146,7 +161,7 @@ class Platform : public Box {
   Platform(Vector2 pos, Vector2 size, Color color, float speed)
       : Box{pos, size, 0, color}, _speed{speed} {}
 
-  auto update(const Scene &scene, float dt) {
+  auto update(const Scene &scene, float dt) noexcept -> void {
     if (IsKeyDown(KEY_LEFT)) {
       this->_pos.x -= this->_speed * dt;
     }
@@ -168,11 +183,10 @@ class Ball : public Box {
   Ball(Vector2 pos, Vector2 size, Color color, Vector2 velocity, float speed)
       : Box{pos, size, 0, color}, _velocity{velocity}, _speed{speed} {}
 
-  auto update(const Scene &scene, HittableCrates &crates,
-              const Platform &platform, float dt) {
+  auto update(const Scene &scene, float dt) noexcept -> void {
     auto last_pos = this->_pos;
-    this->_pos =
-        Vector2Add(this->_pos, Vector2Scale(this->_velocity, this->_speed));
+    this->_pos = Vector2Add(this->_pos,
+                            Vector2Scale(this->_velocity, this->_speed * dt));
 
     if (this->left() < scene.left() || scene.right() < this->right()) {
       this->_pos = last_pos;
@@ -184,45 +198,35 @@ class Ball : public Box {
       this->_velocity.y *= -1.0f;
       return;
     }
+  }
 
+  auto crates_collision(HittableCrates &crates) noexcept -> void {
     for (auto &crate : crates.crates()) {
       if (crate.disabled()) continue;
-      auto collision_type = crate.collision(this);
-      if (collision_type != Box::CollisionType::None) {
+      auto hit = crate.collision(this);
+      if (hit.has_value()) {
         crate.disable();
-        this->_pos = last_pos;
-        this->handle_collision(collision_type);
+        this->apply_hit(hit.value());
       }
     }
-    auto collision_type = platform.collision(this);
-    if (collision_type != Box::CollisionType::None) {
-      this->_pos = last_pos;
-      this->handle_collision(collision_type);
+  }
+
+  auto platform_collision(Platform &platform) noexcept -> void {
+    auto hit = platform.collision(this);
+    if (hit.has_value()) {
+      this->apply_hit(hit.value());
     }
   }
 
  private:
-  auto handle_collision(Box::CollisionType type) -> void {
-    switch (type) {
-      case Box::CollisionType::None: {
-        break;
-      }
-      case Box::CollisionType::Top: {
-        this->_velocity.y *= -1.0f;
-        break;
-      }
-      case Box::CollisionType::Right: {
-        this->_velocity.x *= -1.0f;
-        break;
-      }
-      case Box::CollisionType::Bot: {
-        this->_velocity.y *= -1.0f;
-        break;
-      }
-      case Box::CollisionType::Left: {
-        this->_velocity.x *= -1.0f;
-        break;
-      }
+  auto apply_hit(Box::Hit &hit) noexcept -> void {
+    if ((this->_velocity.x < 0.0f && 0.0f < hit.normal.x) ||
+        (0.0f < this->_velocity.x && hit.normal.x < 0.0f)) {
+      this->_velocity.x *= -1.0f;
+    }
+    if ((this->_velocity.y < 0.0f && 0.0f < hit.normal.y) ||
+        (0.0f < this->_velocity.y && hit.normal.y < 0.0f)) {
+      this->_velocity.y *= -1.0f;
     }
   }
 
@@ -241,7 +245,7 @@ class GameCamera {
 
   GameCamera(Camera2D camera) : camera{camera}, mode{FollowMode::NoFollow} {}
 
-  auto update(const Platform &player) {
+  auto update(const Platform &player) noexcept -> void {
     switch (this->mode) {
       case FollowMode::NoFollow:
         break;
@@ -256,6 +260,7 @@ class GameCamera {
   auto begin_mode_2d() const { BeginMode2D(this->camera); }
   auto end_mode_2d() const { EndMode2D(); }
 
+ private:
   Camera2D camera;
   FollowMode mode;
 };
@@ -265,10 +270,10 @@ auto main() -> int {
   SetTargetFPS(TARGET_FPS);
 
   auto scene =
-      Scene({WIDTH * 0.5, HEIGHT * 0.5}, {WIDTH, HEIGHT}, 2, SCENE_OUTLINE);
+      Scene({WIDTH * 0.5, HEIGHT * 0.5}, {WIDTH, HEIGHT}, 2, SCENE_OUTLINE_COLOR);
 
   auto platform =
-      Platform({WIDTH * 0.5, HEIGHT * 0.8}, {100.0, 20.0}, RED, 500.0);
+      Platform({WIDTH * 0.5, HEIGHT * 0.8}, {100.0, 20.0}, PLATFORM_COLOR, 500.0);
 
   auto game_camera = GameCamera(Camera2D{
       .offset = {WIDTH * 0.5, HEIGHT * 0.5},
@@ -277,25 +282,28 @@ auto main() -> int {
       .zoom = 1.0,
   });
 
-  auto hittable_boxes = HittableCrates(3, 4, {70.0, 30.0}, {110.0, 80.0},
-                                       {WIDTH * 0.5, HEIGHT * 0.2});
+  auto hittable_crates = HittableCrates(3, 4, {70.0, 30.0}, {110.0, 80.0},
+                                        {WIDTH * 0.5, HEIGHT * 0.2});
 
   auto ball =
-      Ball({WIDTH * 0.5, HEIGHT * 0.5}, {30.0, 30.0}, GREEN, {1.4, 1.0}, 2.0);
+      Ball({WIDTH * 0.5, HEIGHT * 0.5}, {30.0, 30.0}, BALL_COLOR, {1.4, 1.0}, 100.0);
 
   while (!WindowShouldClose()) {
     auto dt = GetFrameTime();
 
     platform.update(scene, dt);
     game_camera.update(platform);
-    ball.update(scene, hittable_boxes, platform, dt);
+    ball.update(scene, dt);
+
+    ball.crates_collision(hittable_crates);
+    ball.platform_collision(platform);
 
     BeginDrawing();
-    ClearBackground(BACKGROUND);
+    ClearBackground(BACKGROUND_COLOR);
     game_camera.begin_mode_2d();
 
     scene.draw_lines();
-    hittable_boxes.draw();
+    hittable_crates.draw();
     ball.draw();
     platform.draw();
 
