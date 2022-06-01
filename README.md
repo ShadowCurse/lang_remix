@@ -2,4 +2,7 @@
 ## Collection of simple projects in different languages
 | Name | Language |
 |------|----------|
-| [Breakout](./breakout_cxx) | CXX |
+| [Breakout](./breakout_cxx) | C++ |
+| [FuzzBuzz](./fuzzbuzz_cxx) | C++ |
+| [FuzzBuzz](./fuzzbuzz_rust) | Rust |
+| [FuzzBuzz](./fuzzbuzz_zig) | Zig |
