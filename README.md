@@ -6,4 +6,5 @@
 | [FuzzBuzz](./fuzzbuzz_cxx) | C++ |
 | [FuzzBuzz](./fuzzbuzz_odin) | Odin |
 | [FuzzBuzz](./fuzzbuzz_rust) | Rust |
+| [FuzzBuzz](./fuzzbuzz_v) | V |
 | [FuzzBuzz](./fuzzbuzz_zig) | Zig |
