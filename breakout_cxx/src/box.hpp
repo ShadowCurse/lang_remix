@@ -25,6 +25,8 @@ class Box : public Collider {
 
   [[nodiscard]] auto collision(const Collider* other) noexcept
       -> std::optional<Collision> override {
+    if (this == other) return std::nullopt;
+
     const auto this_rect_opt = this->rect();
     const auto other_rect_opt = other->rect();
 

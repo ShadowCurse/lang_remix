@@ -10,6 +10,14 @@ namespace collision {
 struct Collision {
   Vector2 pos;
   Vector2 normal;
+  
+  [[nodiscard]] constexpr inline auto operator==(const Collision& other) const noexcept -> bool {
+    return this->pos.x == other.pos.x &&
+           this->pos.y == other.pos.y &&
+           this->normal.x == other.normal.x &&
+           this->normal.y == other.normal.y;
+          
+  }
 };
 
 struct Rect {
