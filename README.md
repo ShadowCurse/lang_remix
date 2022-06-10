@@ -4,6 +4,7 @@
 |------|----------|
 | [Breakout](./breakout_cxx) | C++ |
 | [Breakout](./breakout_rust) | Rust |
+| [Breakout](./breakout_zig) | Zig |
 | [FuzzBuzz](./fuzzbuzz_cxx) | C++ |
 | [FuzzBuzz](./fuzzbuzz_odin) | Odin |
 | [FuzzBuzz](./fuzzbuzz_rust) | Rust |
