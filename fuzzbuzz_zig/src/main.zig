@@ -20,19 +20,19 @@ const ParseError = error{
     Overflow,
 };
 
-fn char_to_digit(char: u8) u8 {
+fn char_to_digit(char: u8) !u8 {
     return switch (char) {
         '0'...'9' => char - '0',
         'a'...'z' => char - 'a' + 10,
         'A'...'Z' => char - 'A' + 10,
-        else => unreachable,
+        else => ParseError.InvalidChar,
     };
 }
 
-fn str_to_number(comptime T: type, str: []const u8, radix: u8) ParseError!T {
+fn str_to_number(comptime T: type, str: []const u8, radix: u8) !T {
     var number: T = 0;
     for (str) |c| {
-        const digit = char_to_digit(c);
+        const digit = try char_to_digit(c);
 
         if (digit > radix) {
             return ParseError.InvalidChar;
@@ -89,4 +89,14 @@ pub fn main() !void {
 test "parse u32" {
     const res = try str_to_number(u32, "1234", 10);
     try std.testing.expect(res == 1234);
+}
+
+test "parse u32 negative" {
+    const res = str_to_number(u32, "-1234", 10);
+    try std.testing.expectError(ParseError.InvalidChar, res);
+}
+
+test "parse u32 invalid" {
+    const res = str_to_number(u32, "qwer", 10);
+    try std.testing.expectError(ParseError.InvalidChar, res);
 }
