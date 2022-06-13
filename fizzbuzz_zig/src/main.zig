@@ -3,7 +3,7 @@ const stdout = std.io.getStdOut().writer();
 const allocator = std.testing.allocator;
 
 fn print_usage() !void {
-    try stdout.print("usage: fuzzbuzz <number> \n<number> - amount numbers to process\n", .{});
+    try stdout.print("usage: fizzbuzz <number> \n<number> - amount numbers to process\n", .{});
 }
 
 fn get_args_len() usize {
@@ -50,13 +50,13 @@ fn str_to_number(comptime T: type, str: []const u8, radix: u8) !T {
     return number;
 }
 
-fn fuzzbuzz(n: u32) !void {
+fn fizzbuzz(n: u32) !void {
     var curr: u32 = 1;
     while (curr <= n) : (curr += 1) {
         if (curr % 15 == 0) {
-            try stdout.print("{}: FuzzBuzz\n", .{curr});
+            try stdout.print("{}: FizzBuzz\n", .{curr});
         } else if (curr % 3 == 0) {
-            try stdout.print("{}: Fuzz\n", .{curr});
+            try stdout.print("{}: Fizz\n", .{curr});
         } else if (curr % 5 == 0) {
             try stdout.print("{}: Buzz\n", .{curr});
         } else {
@@ -83,7 +83,7 @@ pub fn main() !void {
         try print_usage();
         std.process.exit(1);
     };
-    try fuzzbuzz(n);
+    try fizzbuzz(n);
 }
 
 test "parse u32" {

@@ -4,15 +4,15 @@ import os
 import strconv
 
 fn print_usage() {
-    println("usage: fuzzbuzz <number> \n<number> - amount of numbers to evaluate")
+    println("usage: fizzbuzz <number> \n<number> - amount of numbers to evaluate")
 }
 
-fn fuzzbuzz(f u64) {
+fn fizzbuzz(f u64) {
     for n in 1 .. (f + 1) {
         if n % 15 == 0 {
-            println("$n: FuzzBuzz")
+            println("$n: FizzBuzz")
         } else if n % 3 == 0 {
-            println("$n: Fuzz")
+            println("$n: Fizz")
         } else if n % 5 == 0 {
             println("$n: Buzz")
         } else {
@@ -32,5 +32,5 @@ fn main() {
     exit(1)
   }
 
-  fuzzbuzz(n)
+  fizzbuzz(n)
 }

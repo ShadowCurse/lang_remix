@@ -2,15 +2,15 @@ use std::env;
 use std::process;
 
 fn print_usage() {
-    println!("usage: fuzzbuzz <number> \n<number> - amount of numbers to evaluate");
+    println!("usage: fizzbuzz <number> \n<number> - amount of numbers to evaluate");
 }
 
-fn fuzzbuzz(n: u32) {
+fn fizzbuzz(n: u32) {
     for n in 1..(n + 1) {
         if n % 15 == 0 {
-            println!("{n}: FuzzBuzz");
+            println!("{n}: FizzBuzz");
         } else if n % 3 == 0 {
-            println!("{n}: Fuzz");
+            println!("{n}: Fizz");
         } else if n % 5 == 0 {
             println!("{n}: Buzz");
         } else {
@@ -28,7 +28,7 @@ fn main() {
     }
 
     if let Ok(n) = args.nth(1).unwrap().parse::<u32>() {
-        fuzzbuzz(n);
+        fizzbuzz(n);
     } else {
         print_usage();
         process::exit(1);

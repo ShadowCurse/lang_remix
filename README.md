@@ -5,8 +5,8 @@
 | [Breakout](./breakout_cxx) | C++ |
 | [Breakout](./breakout_rust) | Rust |
 | [Breakout](./breakout_zig) | Zig |
-| [FuzzBuzz](./fuzzbuzz_cxx) | C++ |
-| [FuzzBuzz](./fuzzbuzz_odin) | Odin |
-| [FuzzBuzz](./fuzzbuzz_rust) | Rust |
-| [FuzzBuzz](./fuzzbuzz_v) | V |
-| [FuzzBuzz](./fuzzbuzz_zig) | Zig |
+| [FizzBuzz](./fizzbuzz_cxx) | C++ |
+| [FizzBuzz](./fizzbuzz_odin) | Odin |
+| [FizzBuzz](./fizzbuzz_rust) | Rust |
+| [FizzBuzz](./fizzbuzz_v) | V |
+| [FizzBuzz](./fizzbuzz_zig) | Zig |

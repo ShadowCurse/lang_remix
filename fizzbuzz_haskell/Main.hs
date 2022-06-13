@@ -18,8 +18,8 @@ fizzbuzz n = intercalate "\n" [checkNumber x | x <- [1 .. n]]
 
 checkNumber :: Natural -> String
 checkNumber x
-  | x `mod` 15 == 0 = printf "%d: %s" x "Fuzzbuzz"
-  | x `mod` 5 == 0 = printf "%d: %s" x "Fuzz"
+  | x `mod` 15 == 0 = printf "%d: %s" x "Fizzbuzz"
+  | x `mod` 5 == 0 = printf "%d: %s" x "Fizz"
   | x `mod` 3 == 0 = printf "%d: %s" x "Buzz"
   | otherwise = printf "%d: %d" x x
 

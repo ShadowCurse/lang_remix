@@ -5,15 +5,15 @@ import "core:os"
 import "core:strconv"
 
 print_usage :: proc() {
-	fmt.println("usage: fuzzbuzz <number> \n<number> - amount of numbers to evaluate")
+	fmt.println("usage: fizzbuzz <number> \n<number> - amount of numbers to evaluate")
 }
 
-fuzzbuzz :: proc(n: uint) {
+fizzbuzz :: proc(n: uint) {
 	for n in 1 ..< (n + 1) {
 		if n % 15 == 0 {
-			fmt.printf("%d: FuzzBuzz\n", n)
+			fmt.printf("%d: FizzBuzz\n", n)
 		} else if n % 3 == 0 {
-			fmt.printf("%d: Fuzz\n", n)
+			fmt.printf("%d: Fizz\n", n)
 		} else if n % 5 == 0 {
 			fmt.printf("%d: Buzz\n", n)
 		} else {
@@ -31,7 +31,7 @@ main :: proc() {
 	}
 
 	if n, ok := strconv.parse_uint(args[1], 10); ok {
-		fuzzbuzz(n)
+		fizzbuzz(n)
 	} else {
 		print_usage()
 		os.exit(1)
