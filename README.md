@@ -6,6 +6,7 @@
 | [Breakout](./breakout_rust) | Rust |
 | [Breakout](./breakout_zig) | Zig |
 | [FizzBuzz](./fizzbuzz_cxx) | C++ |
+| [FizzBuzz](./fizzbuzz_haskell) | Haskell |
 | [FizzBuzz](./fizzbuzz_odin) | Odin |
 | [FizzBuzz](./fizzbuzz_rust) | Rust |
 | [FizzBuzz](./fizzbuzz_v) | V |
