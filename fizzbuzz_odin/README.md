@@ -6,5 +6,6 @@ Simple fizzbuzz implementation in [Odin](https://odin-lang.org/)
 ```bash
 $ git clone https://github.com/ShadowCurse/lang_remix.git
 $ cd fizzbuzz_odin
+$ nix-shell
 $ odin build .
 ```
