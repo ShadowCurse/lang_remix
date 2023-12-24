@@ -74,7 +74,7 @@ pub const Collision = struct {
 
 pub const Collider = struct {
     const Self = @This();
-    const collision_fn = fn (self: *const Self, other: *const Self) ?Collision;
+    const collision_fn = *const fn (self: *const Self, other: *const Self) ?Collision;
 
     collision_check: collision_fn,
     rect: CollisionRect,

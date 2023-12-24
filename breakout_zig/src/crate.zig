@@ -47,15 +47,15 @@ pub const CratePack = struct {
         var s_pos = pos;
         if (rows % 2 == 0) {
             s_pos.y += (gap_y / 2.0 + height / 2.0) -
-                (gap_y + height) * (@intToFloat(f32, rows - 1) / 2);
+                (gap_y + height) * (@as(f32, @floatFromInt(rows - 1)) / 2);
         } else {
-            s_pos.y += (gap_y + height) * (@intToFloat(f32, rows - 1) / 2);
+            s_pos.y += (gap_y + height) * (@as(f32, @floatFromInt(rows - 1)) / 2);
         }
         if (cols % 2 == 0) {
             s_pos.x -=
-                (gap_x / 2.0 + width / 2.0) + (gap_x + width) * (@intToFloat(f32, cols - 1) / 2);
+                (gap_x / 2.0 + width / 2.0) + (gap_x + width) * (@as(f32, @floatFromInt(cols - 1)) / 2);
         } else {
-            s_pos.x -= (gap_x + width) * (@intToFloat(f32, cols - 1) / 2);
+            s_pos.x -= (gap_x + width) * (@as(f32, @floatFromInt(cols - 1)) / 2);
         }
 
         var crates: std.ArrayList(Crate) = std.ArrayList(Crate).init(std.heap.page_allocator);
@@ -64,8 +64,8 @@ pub const CratePack = struct {
             var y: u32 = 0;
             while (y < rows) : (y += 1) {
                 const crate_pos = Vector2{
-                    .x = s_pos.x + @intToFloat(f32, x) * (width + gap_x),
-                    .y = s_pos.y + @intToFloat(f32, y) * (height + gap_y),
+                    .x = s_pos.x + @as(f32, @floatFromInt(x)) * (width + gap_x),
+                    .y = s_pos.y + @as(f32, @floatFromInt(y)) * (height + gap_y),
                 };
                 const crate = Crate.new(crate_pos, Vector2{ .x = width, .y = height }, color);
                 try crates.append(crate);

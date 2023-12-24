@@ -15,7 +15,7 @@ pub const Scene = struct {
     line_tickness: f32,
     color: Color,
 
-    pub fn new(center: Vector2, size: Vector2, line_tickness: f32, color: Color) Self {
+    pub fn new(comptime center: Vector2, comptime size: Vector2, comptime line_tickness: f32, comptime color: Color) Self {
         return Self{
             .collider = Collider.new(center, size, scene_collision),
             .line_tickness = line_tickness,

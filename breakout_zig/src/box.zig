@@ -22,7 +22,7 @@ pub const Box = struct {
         rl.DrawRectangleRec(self.collider.rect.inner(), self.color);
     }
 
-    pub fn collides(self: *const Self, collider: *const Collider) ?Collision{
+    pub fn collides(self: *const Self, collider: *const Collider) ?Collision {
         return self.collider.collides(collider);
     }
 
@@ -36,12 +36,12 @@ pub const Box = struct {
 
         const dx = other_rect.pos().x - this_rect.pos().x;
         const px =
-            (other_rect.width() / 2.0 + this_rect.width() / 2.0) - std.math.absFloat(dx);
+            (other_rect.width() / 2.0 + this_rect.width() / 2.0) - @fabs(dx);
         if (px <= 0) return null;
 
         const dy = other_rect.pos().y - this_rect.pos().y;
         const py =
-            (other_rect.height() / 2.0 + this_rect.height() / 2.0) - std.math.absFloat(dy);
+            (other_rect.height() / 2.0 + this_rect.height() / 2.0) - @fabs(dy);
         if (py <= 0) return null;
 
         if (px < py) {
