@@ -3,9 +3,11 @@
 | Name | Language |
 |------|----------|
 | [Breakout](./breakout_cxx) | C++ |
+| [Breakout](./breakout_go) | Go |
 | [Breakout](./breakout_rust) | Rust |
 | [Breakout](./breakout_zig) | Zig |
 | [FizzBuzz](./fizzbuzz_cxx) | C++ |
+| [FizzBuzz](./fizzbuzz_go) | Go |
 | [FizzBuzz](./fizzbuzz_haskell) | Haskell |
 | [FizzBuzz](./fizzbuzz_odin) | Odin |
 | [FizzBuzz](./fizzbuzz_rust) | Rust |
