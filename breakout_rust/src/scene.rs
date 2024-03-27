@@ -1,8 +1,8 @@
 use crate::utils::*;
-use raylib::prelude::*;
+use raylib_ffi::*;
 
 /// Scene border
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct SceneBorder {
     rect: Rectangle,
     line_thickness: i32,
@@ -26,8 +26,10 @@ impl SceneBorder {
     }
 
     #[inline]
-    pub fn draw(&self, handle: &mut RaylibMode2D<RaylibDrawHandle>) {
-        handle.draw_rectangle_lines_ex(self.rect, self.line_thickness, self.line_color);
+    pub fn draw(&self) {
+        unsafe {
+            DrawRectangleLinesEx(self.rect, self.line_thickness as f32, self.line_color);
+        }
     }
 }
 
@@ -96,13 +98,12 @@ mod test {
         let width = 20.0;
         let height = 15.0;
         let line_thickness = 2;
-        let line_color = Color::GOLD;
+        let line_color = colors::GOLD;
         let scene = SceneBorder::new(pos, width, height, line_thickness, line_color);
 
         let required_rect = Rectangle::from_center(pos, width, height);
-        assert_eq!(scene.rect, required_rect);
+        assert!(scene.rect.eq(&required_rect));
         assert_eq!(scene.line_thickness, line_thickness);
-        assert_eq!(scene.line_color, line_color);
     }
 
     #[test]
@@ -111,11 +112,11 @@ mod test {
         let width = 20.0;
         let height = 15.0;
         let line_thickness = 2;
-        let line_color = Color::GOLD;
+        let line_color = colors::GOLD;
         let scene = SceneBorder::new(pos, width, height, line_thickness, line_color);
 
         let required_rect = Rectangle::from_center(pos, width, height);
-        assert_eq!(scene.rect().unwrap(), &required_rect);
+        assert!(scene.rect().unwrap().eq(&required_rect));
     }
 
     #[test]
@@ -124,7 +125,7 @@ mod test {
         let width = 30.0;
         let height = 30.0;
         let line_thickness = 2;
-        let line_color = Color::GOLD;
+        let line_color = colors::GOLD;
         let scene = SceneBorder::new(pos, width, height, line_thickness, line_color);
 
         // no collison left

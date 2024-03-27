@@ -1,4 +1,15 @@
-use raylib::prelude::*;
+use raylib_ffi::*;
+
+// Trait for easier Vector2 use
+pub trait Vector2Utils {
+    fn eq(&self, other: &Self) -> bool;
+}
+
+impl Vector2Utils for Vector2 {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y
+    }
+}
 
 // Trait for easier rectangle use
 pub trait RectUtils {
@@ -8,6 +19,7 @@ pub trait RectUtils {
     fn bot(&self) -> f32;
     fn left(&self) -> f32;
     fn right(&self) -> f32;
+    fn eq(&self, other: &Self) -> bool;
 }
 
 impl RectUtils for Rectangle {
@@ -48,13 +60,30 @@ impl RectUtils for Rectangle {
     fn right(&self) -> f32 {
         self.x + self.width
     }
+
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x
+            && self.y == other.y
+            && self.width == other.width
+            && self.height == other.height
+    }
 }
 
 // Represents collision between colliders
-#[derive(Debug, Default, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy)]
 pub struct Collision {
     pub pos: Vector2,
     pub normal: Vector2,
+}
+
+impl PartialEq for Collision {
+    fn eq(&self, other: &Self) -> bool {
+        self.pos.x == other.pos.x
+            && self.pos.y == other.pos.y
+            && self.normal.x == other.normal.x
+            && self.normal.y == other.normal.y
+    }
 }
 
 // Trait for determining collison
@@ -85,7 +114,7 @@ impl Collider for Rectangle {
         let this_rect = this_rect.unwrap();
         let other_rect = other_rect.unwrap();
 
-        if this_rect == other_rect {
+        if this_rect.eq(other_rect) {
             return None;
         }
 
@@ -133,7 +162,7 @@ mod test {
         let width = 10.0;
         let height = 10.0;
         let rect = Rectangle::from_center(pos, width, height);
-        assert_eq!(rect.pos(), Vector2 { x: 0.0, y: 0.0 });
+        assert!(rect.pos().eq(&Vector2 { x: 0.0, y: 0.0 }));
         assert_eq!(rect.left(), -5.0);
         assert_eq!(rect.right(), 5.0);
         assert_eq!(rect.top(), -5.0);

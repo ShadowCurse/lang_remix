@@ -1,8 +1,8 @@
 use crate::scene::SceneBorder;
 use crate::utils::*;
-use raylib::prelude::*;
+use raylib_ffi::*;
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Platform {
     rect: Rectangle,
     color: Color,
@@ -16,16 +16,20 @@ impl Platform {
     }
 
     #[inline]
-    pub fn draw(&self, handle: &mut RaylibMode2D<RaylibDrawHandle>) {
-        handle.draw_rectangle_rec(self.rect, self.color);
+    pub fn draw(&self) {
+        unsafe {
+            DrawRectangleRec(self.rect, self.color);
+        }
     }
 
-    pub fn update(&mut self, scene: &SceneBorder, handle: &RaylibHandle, dt: f32) {
-        if handle.is_key_down(KeyboardKey::KEY_A) {
-            self.rect.x -= self.speed * dt;
-        }
-        if handle.is_key_down(KeyboardKey::KEY_D) {
-            self.rect.x += self.speed * dt;
+    pub fn update(&mut self, scene: &SceneBorder, dt: f32) {
+        unsafe {
+            if IsKeyDown(enums::KeyboardKey::A as i32) {
+                self.rect.x -= self.speed * dt;
+            }
+            if IsKeyDown(enums::KeyboardKey::D as i32) {
+                self.rect.x += self.speed * dt;
+            }
         }
         if let Some(collision) = scene.collides(self) {
             if 0.0 <= collision.normal.x {

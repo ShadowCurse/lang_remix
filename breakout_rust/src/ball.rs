@@ -2,7 +2,7 @@ use crate::crates::CratePack;
 use crate::platform::Platform;
 use crate::scene::SceneBorder;
 use crate::utils::{Collider, Collision, RectUtils};
-use raylib::prelude::*;
+use raylib_ffi::*;
 
 pub struct Ball {
     rect: Rectangle,
@@ -30,8 +30,10 @@ impl Ball {
     }
 
     #[inline]
-    pub fn draw(&self, handle: &mut RaylibMode2D<RaylibDrawHandle>) {
-        handle.draw_rectangle_rec(self.rect, self.color);
+    pub fn draw(&self) {
+        unsafe {
+            DrawRectangleRec(self.rect, self.color);
+        }
     }
 
     pub fn update(

@@ -1,7 +1,7 @@
 use crate::utils::*;
-use raylib::prelude::*;
+use raylib_ffi::*;
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Crate {
     rect: Rectangle,
     color: Color,
@@ -29,9 +29,11 @@ impl Crate {
     }
 
     #[inline]
-    pub fn draw(&self, handle: &mut RaylibMode2D<RaylibDrawHandle>) {
+    pub fn draw(&self) {
         if !self.disabled {
-            handle.draw_rectangle_rec(self.rect, self.color);
+            unsafe {
+                DrawRectangleRec(self.rect, self.color);
+            }
         }
     }
 }
@@ -90,9 +92,9 @@ impl CratePack {
         Self { crates }
     }
 
-    pub fn draw(&self, handle: &mut RaylibMode2D<RaylibDrawHandle>) {
+    pub fn draw(&self) {
         for c in &self.crates {
-            c.draw(handle);
+            c.draw();
         }
     }
 }
@@ -131,12 +133,12 @@ mod test {
             10.0,
             2.0,
             2.0,
-            Color::GREEN,
+            colors::GREEN,
         );
         assert_eq!(crate_pack.crates.len(), 1);
 
         let crate_rect = Rectangle::from_center(Vector2 { x: 0.0, y: 0.0 }, 10.0, 10.0);
-        assert_eq!(crate_pack.crates[0].rect, crate_rect);
+        assert!(crate_pack.crates[0].rect.eq(&crate_rect));
     }
 
     #[test]
@@ -149,15 +151,15 @@ mod test {
             10.0,
             2.0,
             2.0,
-            Color::GREEN,
+            colors::GREEN,
         );
         assert_eq!(crate_pack.crates.len(), 2);
 
         let crate_rect = Rectangle::from_center(Vector2 { x: -6.0, y: 0.0 }, 10.0, 10.0);
-        assert_eq!(crate_pack.crates[0].rect, crate_rect);
+        assert!(crate_pack.crates[0].rect.eq(&crate_rect));
 
         let crate_rect = Rectangle::from_center(Vector2 { x: 6.0, y: 0.0 }, 10.0, 10.0);
-        assert_eq!(crate_pack.crates[1].rect, crate_rect);
+        assert!(crate_pack.crates[1].rect.eq(&crate_rect));
     }
 
     #[test]
@@ -170,17 +172,17 @@ mod test {
             10.0,
             2.0,
             2.0,
-            Color::GREEN,
+            colors::GREEN,
         );
         assert_eq!(crate_pack.crates.len(), 3);
 
         let crate_rect = Rectangle::from_center(Vector2 { x: -12.0, y: 0.0 }, 10.0, 10.0);
-        assert_eq!(crate_pack.crates[0].rect, crate_rect);
+        assert!(crate_pack.crates[0].rect.eq(&crate_rect));
 
         let crate_rect = Rectangle::from_center(Vector2 { x: 0.0, y: 0.0 }, 10.0, 10.0);
-        assert_eq!(crate_pack.crates[1].rect, crate_rect);
+        assert!(crate_pack.crates[1].rect.eq(&crate_rect));
 
         let crate_rect = Rectangle::from_center(Vector2 { x: 12.0, y: 0.0 }, 10.0, 10.0);
-        assert_eq!(crate_pack.crates[2].rect, crate_rect);
+        assert!(crate_pack.crates[2].rect.eq(&crate_rect));
     }
 }
