@@ -11,6 +11,7 @@
 | [FizzBuzz](./fizzbuzz_go) | Go |
 | [FizzBuzz](./fizzbuzz_haskell) | Haskell |
 | [FizzBuzz](./fizzbuzz_odin) | Odin |
+| [FizzBuzz](./fizzbuzz_roc) | Roc |
 | [FizzBuzz](./fizzbuzz_rust) | Rust |
 | [FizzBuzz](./fizzbuzz_v) | V |
 | [FizzBuzz](./fizzbuzz_zig) | Zig |
