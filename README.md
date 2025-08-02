@@ -9,6 +9,7 @@
 | [Breakout](./breakout_zig) | Zig |
 | [FizzBuzz](./fizzbuzz_cxx) | C++ |
 | [FizzBuzz](./fizzbuzz_go) | Go |
+| [FizzBuzz](./fizzbuzz_hare) | Hare |
 | [FizzBuzz](./fizzbuzz_haskell) | Haskell |
 | [FizzBuzz](./fizzbuzz_odin) | Odin |
 | [FizzBuzz](./fizzbuzz_roc) | Roc |
