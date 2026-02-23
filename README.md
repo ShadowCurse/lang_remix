@@ -16,3 +16,4 @@
 | [FizzBuzz](./fizzbuzz_rust) | Rust |
 | [FizzBuzz](./fizzbuzz_v) | V |
 | [FizzBuzz](./fizzbuzz_zig) | Zig |
+| [FizzBuzz](./fizzbuzz_jai) | Jai |
