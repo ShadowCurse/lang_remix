@@ -7,6 +7,7 @@
 | [Breakout](./breakout_odin) | Odin |
 | [Breakout](./breakout_rust) | Rust |
 | [Breakout](./breakout_zig) | Zig |
+| [Breakout](./breakout_jai) | Jai |
 | [FizzBuzz](./fizzbuzz_cxx) | C++ |
 | [FizzBuzz](./fizzbuzz_go) | Go |
 | [FizzBuzz](./fizzbuzz_hare) | Hare |
